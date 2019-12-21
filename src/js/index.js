@@ -10,7 +10,7 @@ $(function() {
 		deceleration:0.0006, //阻尼系数,系数越小滑动越灵敏
 		bounce: true //是否启用回弹
 	});
-	var posiInfo = {};
+	var poi_info = {};
 	var flag = false, center = "", lng = "", lat = "", curCity = "", resultList = [];
 	var mymap = null;
 
@@ -38,12 +38,14 @@ $(function() {
 								</li>`;
 					}
 				}
+				/*渲染检索结果*/
 				var ele = flag?$(".addresslist2"):$(".addresslist");
 				if(str) ele.html(str);
 				else {
 					var str = flag?"没有符合地址":"附近没有搜索结果";
 					ele.html(str);
 				}
+				/*结果列表滚动到顶端*/
 				if(!flag) mui('.addresslist-container').scroll().setTranslate(0, 0);
 				else mui('#background').scroll().setTranslate(0, 0);
 			} else {
@@ -53,23 +55,23 @@ $(function() {
 	};
 	var local = new BMap.LocalSearch(mymap, options); // 搜索类实例
 	local.setPageCapacity(30); // 设置每页容量，取值范围：1 - 100. 此值只对下一次检索有效
+	var myGeo = new BMap.Geocoder();
 
 	publicLisenters();
 
 	/*初始中心点为输入坐标*/
-	getAddress({"address":"深圳建业大厦", "location": "114.023061,22.543022"});
+	getAddress({"address":"深圳市福田区建业大厦", "location": "114.023061,22.543022"});
 	/*初始中心点为当前坐标*/
-//	getCurAddress1();
+//	getCurAddress();
 
 	function getAddress(obj){
-		if(obj.location && obj.location.length > 0) {
+		if(obj.location && obj.location.length > 0) { // 给定坐标点
 			lng = Number(obj.location.split(",")[0]);
 			lat = Number(obj.location.split(",")[1]);
 			center = new BMap.Point(lng, lat);
 			mymap.centerAndZoom(center, 14);
 			showMap(center);
 		} else if(obj.address && obj.address.length > 0) { // 地址转坐标
-			var myGeo = new BMap.Geocoder();
 			myGeo.getPoint(obj.address, function(data){
 				lng = data.lng;
 				lat = data.lat;
@@ -79,7 +81,9 @@ $(function() {
 			});
 		}
 	}
-	function showMap(poi) { // 重置map
+	
+	/*重置map*/
+	function showMap(poi) {
 		var icon = new BMap.Icon("../assets/img/map_center_overlay.png", new BMap.Size(36, 36), {
 			anchor: new BMap.Size(18, 36)
 		});
@@ -87,22 +91,29 @@ $(function() {
 //		var mk = new centerPointOverlay(poi, 0.48, "img/center_overlay.png");
 		mymap.clearOverlays();
 		mymap.addOverlay(mk);
+		myGeo.getLocation(center, function(rs){
+			$("ul.center-address li").attr("data-lng",center.lng)
+			$("ul.center-address li").attr("data-lat",center.lat)
+			$("ul.center-address li .address").text(rs.address);
+			if(curCity !== rs.addressComponents.city) {
+				curCity = rs.addressComponents.city;
+				if($(".current-city").css("visibility") === "hidden") $(".current-city").css("visibility", "visible");
+				$(".current-city").text(curCity);
+			}
+		}, {"poiRadius": 300, "numPois": 10});
 		/*百度地图POI行业分类（tag）*/
 		/*http://lbsyun.baidu.com/index.php?title=open/dev-res*/
-		local.searchNearby(["房地产","公司企业","政府机构","购物","教育培训","生活服务","栋","楼","号"], poi, 200);
-		getCurCity(poi);
+		local.searchNearby(["房地产","公司企业","政府机构","购物","教育培训","生活服务","栋","楼","路"], poi, 200);
 	}
 	function publicLisenters() {
-		/*点击返回*/
 		$(document).on("tap", ".addresslist>li,.addresslist2>li", function() {
 			var address = $(this).children(".address").html();
 			lng = $(this).attr("data-lng");
 			lat = $(this).attr("data-lat");
 			var locations = lng + "," + lat;
-			posiInfo.address = address;
-			posiInfo.location = locations;
-			sessionStorage.setItem("address_info", JSON.stringify(posiInfo));
-			history.go(-1);
+			poi_info.address = address;
+			poi_info.location = locations;
+			console.log("选中地址：",poi_info);
 		});
 		mymap.addEventListener("dragend", function(){ // 地图拖拽
 			$(".mui-loading").css("display", "block");
@@ -115,10 +126,8 @@ $(function() {
 			center = mymap.getCenter();
 			showMap(center);
 		});
-		mymap.addEventListener("tap", function(){ $("#address").blur();});
-		$(".current-position").on("tap", function(){
-			getCurPosition();
-		});
+		$(".current-position").on("tap", debounce(getCurPosition, 500));
+
 		/*搜索*/
 		$("#address").bind("input propertychange", debounce(function() {
 			var inputval = $(this).val();
@@ -128,7 +137,7 @@ $(function() {
 				var local_city = new BMap.LocalSearch(curCity, options); // 搜索类实例
 				local_city.setPageCapacity(50); // 设置每页容量，取值范围：1 - 100. 此值只对下一次检索有效
 				local_city.search([inputval], {forceLocal: true});
-				$("#background").css("display", "block")
+				$("#background").css("display", "block");
 			} else {
 				flag = false;
 				$("#background").css("display", "none")
@@ -140,50 +149,37 @@ $(function() {
 		if(curCenter) {
 			mymap.centerAndZoom(curCenter, 14);
 			showMap(curCenter);
-		}
-		else getCurAddress1();
+		} else getCurAddress();
 	}
-	/*当前城市*/
-	function getCurCity(poi) {
-		var gc = new BMap.Geocoder();
-		gc.getLocation(poi, function(rs){
-			if(curCity !== rs.addressComponents.city) {
-				curCity = rs.addressComponents.city;
-				if($(".current-city").css("visibility") === "hidden") $(".current-city").css("visibility", "visible");
-				$(".current-city").text(curCity);
-			}
-		});
-	}
-	/*获取当前位置,浏览器定位存在bug*/
 	function getCurAddress() {
-		var geolocation = new BMap.Geolocation();
-		geolocation.getCurrentPosition(function(r){
-			console.log(r)
-			if(this.getStatus() == BMAP_STATUS_SUCCESS){
-			    const convertor = new BMap.Convertor();
-			    convertor.translate([r.point], 1, 5,function(data) {
-			        if(data && data.points && data.points.length>0){
-			            lng = data.points[0].lng;
-			            lat = data.points[0].lat;
-			            center = data.points[0];
-			            curCenter = center;
-			            mymap.centerAndZoom(center, 14);
-			            showMap(center);
-			        }
-			    });
-			} else {
-				mui.toast('定位当前位置失败');
-				mymap.centerAndZoom("深圳市", 14);
-			}
-		},{enableHighAccuracy: true,timeout:3000})
-	}
-	function getCurAddress1() {
 //		调试
-		lng = "114.237859";
-		lat = "22.691859";
+		lng = "114.237859", lat = "22.691859";
 		center = new BMap.Point(lng, lat);
 		curCenter = center;
 		mymap.centerAndZoom(center, 14);
 		showMap(center);
 	}
+	/*获取当前位置,浏览器定位存在bug，在移动端只能定位到城市级别*/
+//	function getCurAddress() {
+//		var geolocation = new BMap.Geolocation();
+//		geolocation.getCurrentPosition(function(r){
+//			console.log(r)
+//			if(this.getStatus() == BMAP_STATUS_SUCCESS){
+//			    const convertor = new BMap.Convertor();
+//			    convertor.translate([r.point], 1, 5,function(data) {
+//			        if(data && data.points && data.points.length>0){
+//			            lng = data.points[0].lng;
+//			            lat = data.points[0].lat;
+//			            center = data.points[0];
+//			            curCenter = center;
+//			            mymap.centerAndZoom(center, 14);
+//			            showMap(center);
+//			        }
+//			    });
+//			} else {
+//				mui.toast('定位当前位置失败');
+//				mymap.centerAndZoom("深圳市", 14);
+//			}
+//		},{enableHighAccuracy: true,timeout:3000})
+//	}
 })

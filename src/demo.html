@@ -31,12 +31,6 @@
 			<div class="mui-scroll-wrapper addresslist-container">
 				<div class="mui-loading"><div class="mui-spinner"></div></div>
 				<div id="prodlist-view" class="mui-scroll">
-					<ul class="center-address">
-						<li data-lng="" data-lat="">
-							<div class="title">当前位置</div>
-							<div class="address"></div>
-						</li>
-					</ul>
 					<ul class="addresslist"></ul>
 				</div>
 			</div>
@@ -195,13 +189,8 @@ input::-webkit-input-placeholder {
 	width: 100%;
 	background-color: #FFFFFF;
 }
-.addresslist,.addresslist2,.center-address {text-align: center;padding:0.2rem 0.4rem 0;}
-.addresslist li,.addresslist2 li,.center-address li {
-	text-align: left;
-	padding: 0.2rem 0;
-	border-bottom: 1px solid #DADFE6;
-	color: #242526;
-}
+.addresslist, .addresslist2 {text-align: center;padding:0.2rem 0.4rem 0;}
+.addresslist li, .addresslist2 li {text-align: left;padding: 0.2rem 0;}
 </style>
 
 </html>
