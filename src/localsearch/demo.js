@@ -1,33 +1,20 @@
 $(function() {
 	var curCenter = null; // 用户当前位置
-	mui.init();
-	mui('.mui-scroll-wrapper').scroll({
-		scrollY: true, //是否竖向滚动
-		scrollX: false, //是否横向滚动
-		startX: 0, //初始化时滚动至x
-		startY: 0, //初始化时滚动至y
-		indicators: true, //是否显示滚动条
-		deceleration:0.0006, //阻尼系数,系数越小滑动越灵敏
-		bounce: true //是否启用回弹
-	});
-	var poi_info = {};
-	var flag = false, center = "", lng = "", lat = "", curCity = "", resultList = [];
-	var mymap = null;
+	var flag = false;     // 标记地址列表
+	var center = "";      // 地图中心点
+	var curCity = "";     // 当前城市名
 
 	$(".top-icon-back").on("tap", function(){history.go(-1);});
 
-	mymap = new BMap.Map("container", {enableMapClick:false});
-	var size = new BMap.Size(10, window.innerHeight*0.73-window.innerWidth*0.6/7.5);
+	var mymap = new BMap.Map("container", {enableMapClick:false});
 	mymap.addControl(new BMap.NavigationControl({
 		anchor: BMAP_ANCHOR_TOP_RIGHT,
-		offset: size,
 		type: BMAP_NAVIGATION_CONTROL_SMALL
 	}));
 
 	/*搜索类配置*/
 	var options = {
 		onSearchComplete: function(results) {
-			$(".mui-loading").css("display", "none");
 			if(local.getStatus() == BMAP_STATUS_SUCCESS) {
 				var str = "";
 				for(var j = 0; j < results.length; j++) {
@@ -45,9 +32,6 @@ $(function() {
 					var str = flag?"没有符合地址":"附近没有搜索结果";
 					ele.html(str);
 				}
-				/*结果列表滚动到顶端*/
-				if(!flag) mui('.addresslist-container').scroll().setTranslate(0, 0);
-				else mui('#background').scroll().setTranslate(0, 0);
 			} else {
 				if(!flag) $(".addresslist").html("附近没有搜索结果");
 			}
@@ -57,7 +41,7 @@ $(function() {
 	local.setPageCapacity(30); // 设置每页容量，取值范围：1 - 100. 此值只对下一次检索有效
 	var myGeo = new BMap.Geocoder();
 
-	publicLisenters();
+	setListeners();
 
 	/*初始中心点为输入坐标*/
 	getAddress({"address":"深圳市福田区建业大厦", "location": "114.023061,22.543022"});
@@ -66,15 +50,11 @@ $(function() {
 
 	function getAddress(obj){
 		if(obj.location && obj.location.length > 0) { // 给定坐标点
-			lng = Number(obj.location.split(",")[0]);
-			lat = Number(obj.location.split(",")[1]);
-			center = new BMap.Point(lng, lat);
+			center = new BMap.Point(Number(obj.location.split(",")[0]), Number(obj.location.split(",")[1]));
 			mymap.centerAndZoom(center, 14);
 			showMap(center);
 		} else if(obj.address && obj.address.length > 0) { // 地址转坐标
 			myGeo.getPoint(obj.address, function(data){
-				lng = data.lng;
-				lat = data.lat;
 				center = new BMap.Point(lng, lat);
 				mymap.centerAndZoom(center, 14);
 				showMap(center);
@@ -84,11 +64,10 @@ $(function() {
 	
 	/*重置map*/
 	function showMap(poi) {
-		var icon = new BMap.Icon("../assets/img/map_center_overlay.png", new BMap.Size(36, 36), {
-			anchor: new BMap.Size(18, 36)
+		var icon = new BMap.Icon("img/center.png", new BMap.Size(30, 30), {
+			anchor: new BMap.Size(15, 30)
 		});
 		var mk = new BMap.Marker(poi, {icon: icon});
-//		var mk = new centerPointOverlay(poi, 0.48, "img/center_overlay.png");
 		mymap.clearOverlays();
 		mymap.addOverlay(mk);
 		myGeo.getLocation(center, function(rs){
@@ -105,28 +84,33 @@ $(function() {
 		/*http://lbsyun.baidu.com/index.php?title=open/dev-res*/
 		local.searchNearby(["房地产","公司企业","政府机构","购物","教育培训","生活服务","栋","楼","路"], poi, 200);
 	}
-	function publicLisenters() {
-		$(document).on("tap", ".addresslist>li,.addresslist2>li", function() {
-			var address = $(this).children(".address").html();
-			lng = $(this).attr("data-lng");
-			lat = $(this).attr("data-lat");
-			var locations = lng + "," + lat;
-			poi_info.address = address;
-			poi_info.location = locations;
-			console.log("选中地址：",poi_info);
+	function setListeners() {
+		/*地址结果列表点击事件*/
+		$(document).on("click", ".addresslist>li,.addresslist2>li,.center-address>li", function() {
+			var address = $(this).children(".address").text();
+			var lng = $(this).attr("data-lng"), lat = $(this).attr("data-lat");
+			console.log({"address":address, "location":lng+","+lat});
+			alert("address: "+address+"\nlocation: "+lng+","+lat)
 		});
-		mymap.addEventListener("dragend", function(){ // 地图拖拽
-			$(".mui-loading").css("display", "block");
+		/*地图拖拽*/
+		mymap.addEventListener("dragend", function(){
 			$("#address").blur();
 			center = mymap.getCenter();
 			showMap(center);
 		});
-		mymap.addEventListener("zoomend", function(){ // 地图缩放
+		/*地图缩放*/
+		mymap.addEventListener("zoomend", function(){
 			$("#address").blur();
 			center = mymap.getCenter();
 			showMap(center);
 		});
-		$(".current-position").on("tap", debounce(getCurPosition, 500));
+		/*当前定位*/
+		$(".current-position").on("click", debounce(function(){
+			if(curCenter) {
+				mymap.centerAndZoom(curCenter, 14);
+				showMap(curCenter);
+			} else getCurAddress();
+		}, 500));
 
 		/*搜索*/
 		$("#address").bind("input propertychange", debounce(function() {
@@ -144,32 +128,18 @@ $(function() {
 			}
 		}, 300));
 	}
-	/*获取当前定位*/
-	function getCurPosition() {
-		if(curCenter) {
-			mymap.centerAndZoom(curCenter, 14);
-			showMap(curCenter);
-		} else getCurAddress();
-	}
+	/*获取当前位置,浏览器定位存在bug，在移动端只能定位到城市级别，需原生辅助定位*/
 	function getCurAddress() {
-//		调试
-		lng = "114.237859", lat = "22.691859";
-		center = new BMap.Point(lng, lat);
+		center = new BMap.Point("114.237859", "22.691859");
 		curCenter = center;
 		mymap.centerAndZoom(center, 14);
 		showMap(center);
-	}
-	/*获取当前位置,浏览器定位存在bug，在移动端只能定位到城市级别*/
-//	function getCurAddress() {
 //		var geolocation = new BMap.Geolocation();
 //		geolocation.getCurrentPosition(function(r){
-//			console.log(r)
 //			if(this.getStatus() == BMAP_STATUS_SUCCESS){
 //			    const convertor = new BMap.Convertor();
 //			    convertor.translate([r.point], 1, 5,function(data) {
 //			        if(data && data.points && data.points.length>0){
-//			            lng = data.points[0].lng;
-//			            lat = data.points[0].lat;
 //			            center = data.points[0];
 //			            curCenter = center;
 //			            mymap.centerAndZoom(center, 14);
@@ -177,9 +147,20 @@ $(function() {
 //			        }
 //			    });
 //			} else {
-//				mui.toast('定位当前位置失败');
 //				mymap.centerAndZoom("深圳市", 14);
 //			}
 //		},{enableHighAccuracy: true,timeout:3000})
-//	}
+	}
+	/*防抖*/
+	function debounce(fn, delay) {
+	  var timer
+	  return function () {
+	    var context = this
+	    var args = arguments
+	    clearTimeout(timer)
+	    timer = setTimeout(function () {
+	      fn.apply(context, args)
+	    }, delay)
+	  }
+	}
 })

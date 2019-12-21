@@ -5,20 +5,19 @@
 		<meta charset="UTF-8">
 		<title></title>
 		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
-		<link rel="stylesheet" href="../assets/css/mui.min.css" />
-		<link rel="stylesheet" href="../assets/css/public.css" />
-		<!--<link rel="stylesheet" href="../../../assets/fonts/font-awesome.min.css" />-->
-		<script type="text/javascript" src="../assets/js/mui.min.js"></script>
-		<script type="text/javascript" src="../assets/js/lib-flexible.js.js"></script>
-		<script type="text/javascript" src="../assets/js/jquery-3.3.1.min.js"></script>
-		<script type="text/javascript" src="../assets/js/debounce.js"></script>
-		<script type="text/javascript" src="js/index.js"></script>
+		<link rel="stylesheet" href="../../assets/css/mui.min.css" />
+		<link rel="stylesheet" href="../../assets/css/public.css" />
+		<script type="text/javascript" src="../../assets/js/mui.min.js"></script>
+		<script type="text/javascript" src="../../assets/js/lib-flexible.js.js"></script>
+		<script type="text/javascript" src="../../assets/js/jquery-3.3.1.min.js"></script>
+		<script type="text/javascript" src="../../assets/js/debounce.js"></script>
+		<script type="text/javascript" src="index.js"></script>
 		<script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=NULNAeqfh9NrGFGlRbG8NxvIvseGvVZ1"></script>
 	</head>
 
 	<body>
 		<header id="header" class="mui-bar mui-bar-nav">
-			<img class="mui-pull-left back-icon top-icon-back" src="../assets/img/back1.png"></img>
+			<img class="mui-pull-left back-icon top-icon-back" src="img/back1.png"></img>
 			<div class="mui-input-row mui-search search-store">
 			    <input type="search" id="address" placeholder="请输入要搜索的地址">
 			</div>
@@ -31,6 +30,12 @@
 			<div class="mui-scroll-wrapper addresslist-container">
 				<div class="mui-loading"><div class="mui-spinner"></div></div>
 				<div id="prodlist-view" class="mui-scroll">
+					<ul class="center-address">
+						<li data-lng="" data-lat="">
+							<div class="title"><img class="center-poi-icon" src="img/icon_location.png"/>当前定位</div>
+							<div class="address"></div>
+						</li>
+					</ul>
 					<ul class="addresslist"></ul>
 				</div>
 			</div>
@@ -40,7 +45,7 @@
 				</div>
 			</div>
 			<div class="current-city"></div>
-			<img class="current-position" src="../assets/img/map_position.png"></img>
+			<img class="current-position" src="img/map_position.png"></img>
 		</div>
 	</body>
 
@@ -87,7 +92,7 @@
 	max-width: 100px;
 	padding: 0.32rem;
 }
-.mui-bar-nav~.mui-content {padding-top:1rem}
+.mui-bar-nav~.mui-content {padding-top:1rem;overflow: hidden;}
 #header .mui-title {
 	font-size: 0.36rem;
 	color: #333333;
@@ -189,8 +194,19 @@ input::-webkit-input-placeholder {
 	width: 100%;
 	background-color: #FFFFFF;
 }
-.addresslist, .addresslist2 {text-align: center;padding:0.2rem 0.4rem 0;}
-.addresslist li, .addresslist2 li {text-align: left;padding: 0.2rem 0;}
+.center-poi-icon {
+	height: 0.36rem;
+	width: 0.28rem;
+	margin-right: 0.1rem;
+	display: inline-block;
+}
+.addresslist,.addresslist2,.center-address {text-align: center;padding:0.2rem 0.4rem 0;}
+.addresslist li,.addresslist2 li,.center-address li {
+	text-align: left;
+	padding: 0.2rem 0;
+	border-bottom: 1px solid #DADFE6;
+	color: #242526;
+}
 </style>
 
 </html>

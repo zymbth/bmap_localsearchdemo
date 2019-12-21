@@ -1,0 +1,163 @@
+<!doctype html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title>H5-地址选择</title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+		<script type="text/javascript" src="demo.js"></script>
+		<script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=NULNAeqfh9NrGFGlRbG8NxvIvseGvVZ1"></script>
+	</head>
+
+	<body>
+		<header id="header">
+			<img class="top-icon-back" src="img/back.png"></img>
+		    <input type="text" id="address" placeholder="请输入要搜索的地址">
+		</header>
+		<div class="map-content">
+			<div id="container"></div>
+			<div class="addresslist-container">
+				<ul class="center-address">
+					<li data-lng="" data-lat="">
+						<div class="title"><img class="center-poi-icon" src="img/center-icon.png"/>当前定位</div>
+						<div class="address"></div>
+					</li>
+				</ul>
+				<ul class="addresslist"></ul>
+			</div>
+			<div id="background">
+				<ul class="addresslist2"></ul>
+			</div>
+			<div class="current-city"></div>
+			<img class="current-position" src="img/cur-poi.png"></img>
+		</div>
+	</body>
+
+<style>
+* {margin: 0;padding: 0;color: #333333;}
+html,body {width: 100%;height: 100%;}
+ul,ol {list-style: none;}
+img {border: 0;vertical-align: middle;width: 100%;}
+
+.current-position {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    height: 25px;
+    width: 25px;
+}
+.current-city {
+	visibility: hidden;
+    position: absolute;
+    top: 50px;
+    left: 0;
+    height: 30px;
+    line-height: 20px;
+    margin: 15px;
+    padding: 5px 10px;
+    max-width: 150px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 5px;
+    font-size: 15px;
+    box-shadow: 0 0 10px 0 rgba(0,0,0,0.2);
+    box-sizing: border-box;
+}
+#header {
+    position: fixed;
+    z-index: 10;
+    right: 0;
+    left: 0;
+    top:0;
+    height: 50px;
+    padding-right: 10px;
+    padding-left: 0;
+	background: #FAFAFA;
+	-webkit-box-shadow: 0 1px 6px #ccc;
+    box-shadow: 0 1px 6px #ccc;
+}
+#header .top-icon-back {
+	box-sizing: border-box;
+	width: 50px;
+	height: 50px;
+	max-height: 100px;
+	max-width: 100px;
+	padding: 16px;
+}
+.map-content {
+    padding-top: 50px;
+    height: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+    position: relative;
+}
+#address {
+	position: absolute;
+    margin: 10px;
+    padding: 10px 6px;
+    top: 0;
+    left: 40px;
+    width: calc(100% - 65px);
+    height: 30px;
+    box-sizing: border-box;
+}
+
+#container {
+    top: 0;
+    width: 100%;
+    height: 55%;
+}
+.addresslist-container {
+	position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background: white;
+    height: 45%;
+    box-shadow: 0 0 10px 0 rgba(0,0,0,0.2);
+    overflow: scroll;
+}
+.title {
+    margin-bottom: 6px;
+    font-size: 17px;
+    font-family: PingFangSC-Medium;
+    font-weight: 500;
+    line-height: 24px;
+}
+.address {
+    font-size: 15px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #999999;
+}
+#background{
+	border-top:1px solid gainsboro;
+	width: 100%;
+	height: calc(100% - 50px);
+    position: absolute;
+    top: 50px;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: white;
+	z-index: 5;
+	overflow: scroll;
+	display: none;
+}
+.center-poi-icon {
+	height: 18px;
+	width: 18px;
+	margin-right: 5px;
+	display: inline-block;
+}
+.addresslist,.addresslist2,.center-address {text-align: center;padding:10px 20px 0;}
+.addresslist li,.addresslist2 li,.center-address li {
+	text-align: left;
+	padding: 5px 0;
+	border-bottom: 1px solid #DADFE6;
+	color: #242526;
+}
+</style>
+
+</html>
