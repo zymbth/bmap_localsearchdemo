@@ -1,6 +1,10 @@
-# bmap_localsearchdemo
-百度地图H5demo，包括加载地图、定位、周边搜索、本地搜索等功能
+# 百度地图H5 demo
+> 语言：js+jQuery
+>
+> 包括加载地图、定位、周边搜索、本地搜索等功能
 
-语言：js+jQuery
+![preview](documentation/1.png)
 
-UI框架：MUI
+> 本地搜索
+
+![preview](documentation/2.png)
