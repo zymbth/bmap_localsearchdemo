@@ -82,7 +82,7 @@ $(function() {
 		}, {"poiRadius": 300, "numPois": 10});
 		/*百度地图POI行业分类（tag）*/
 		/*http://lbsyun.baidu.com/index.php?title=open/dev-res*/
-		local.searchNearby(["房地产","公司企业","政府机构","购物","教育培训","生活服务","栋","楼","路"], poi, 200);
+		local.searchNearby(["公司企业","政府机构","购物","生活服务","栋","楼","路","教育培训"], poi, 200);
 	}
 	function setListeners() {
 		/*地址结果列表点击事件*/
